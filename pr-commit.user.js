@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name        Commit hash for merged PR
+// @name        Info for merged PR
 // @namespace   Violentmonkey Scripts
 // @include     /github\.com\/([\w-]+\/[\w-]+)\/pull\/(\d+)/
 // @grant       none
-// @version     1.2
+// @version     1.3
 // @author      Bryan Go
 // @description 10/29/2023, 11:47:39 AM
 // ==/UserScript==
