@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @include     /github\.com\/([\w-]+\/[\w-]+)\/pull\/(\d+)/
 // @grant       none
-// @version     1.1
+// @version     1.2
 // @author      Bryan Go
 // @description 10/29/2023, 11:47:39 AM
 // ==/UserScript==
@@ -37,42 +37,40 @@
     if (!isNixpkgs) {
       return
     }
-    // probabaly need to be refactored
+
     const compareLink = `https://github.com/NixOS/nixpkgs/compare/${commitHash}`
     const compareApi = `https://api.github.com/repos/NixOS/nixpkgs/compare/${commitHash}`
-    const withMaster = `${compareApi}...master`
-    const withNixpkgs = `${compareApi}...nixpkgs-unstable`
-    const withNixos = `${compareApi}...nixos-unstable`
 
-    const masterId = 'compare-master'
-    const nixpkgsId = 'compare-nixpkgs'
-    const nixosId = 'compare-nixos'
-    prInfoLine.innerHTML +=
-      `&ensp;<a href="${compareLink}...master" id="${masterId}"><b>master</b></a>`
-    prInfoLine.innerHTML +=
-      `&ensp;<a href="${compareLink}...nixpkgs-unstable" id="${nixpkgsId}"><b>nixpkgs-unstable</b></a>`
-    prInfoLine.innerHTML +=
-      `&ensp;<a href="${compareLink}...nixos-unstable" id="${nixosId}"><b>nixos-unstable</b></a>`
+    const branches = [
+      { name: 'master', id: 'compare-master' },
+      { name: 'nixpkgs-unstable', id: 'compare-nixpkgs' },
+      { name: 'nixos-unstable', id: 'compare-nixos' }
+    ]
 
-    const branchIndicate = (success, idSelector) => {
-      const indicator = document.querySelector(`#${idSelector}`)
-      if (success) {
-        indicator.outerHTML = '✅ ' + indicator.outerHTML
-      } else {
-        indicator.outerHTML = '⚠️ ' + indicator.outerHTML
-      }
+    for (const branch in branches) {
+      prInfoLine.innerHTML +=
+      `&ensp;<a href="${compareLink}...master" id="${branch.id}"><b>${branch.name}</b></a>`
     }
 
-    const fetchBranchStatus = (link, idSelector) => fetch(`${link}?per_page=1`)
+    const branchIndicate = (success, branchId) => {
+      const branchInfo = document.querySelector(`#${branchId}`)
+      let indicator = '⚠️ '
+      if (success) {
+        indicator = '✅ '
+      }
+      branchInfo.outerHTML = indicator + branchInfo.outerHTML
+    }
+
+    const fetchBranchStatus = (branch) => fetch(
+      `${compareApi}...${branch.name}?per_page=1`
+    )
       .then(async (response) => await response.text())
       .then((text) => JSON.parse(text))
       .then((json) => json.status === 'ahead')
-      .then((success) => { branchIndicate(success, idSelector) })
+      .then((success) => { branchIndicate(success, branch.id) })
       .catch((e) => { console.log(e) })
 
-    fetchBranchStatus(withMaster, masterId)
-    fetchBranchStatus(withNixpkgs, nixpkgsId)
-    fetchBranchStatus(withNixos, nixosId)
+    branches.forEach(fetchBranchStatus)
   }
 
   fetch(prApi)
