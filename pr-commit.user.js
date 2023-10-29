@@ -36,19 +36,20 @@
 
     if (isNixpkgs) {
       const compareLink = `https://github.com/NixOS/nixpkgs/compare/${commitHash}`
-      const withMaster = `${compareLink}...master`
-      const withNixpkgs = `${compareLink}...nixpkgs-unstable`
-      const withNixos = `${compareLink}...nixos-unstable`
+      const compareApi = `https://api.github.com/repos/NixOS/nixpkgs/compare/${commitHash}`
+      const withMaster = `${compareApi}...master`
+      const withNixpkgs = `${compareApi}...nixpkgs-unstable`
+      const withNixos = `${compareApi}...nixos-unstable`
 
       const masterId = 'compare-master'
       const nixpkgsId = 'compare-nixpkgs'
       const nixosId = 'compare-nixos'
       prInfoLine.innerHTML +=
-        `&ensp;<a href="${withMaster}" id="${masterId}"><b>master</b></a>`
+        `&ensp;<a href="${compareLink}...master" id="${masterId}"><b>master</b></a>`
       prInfoLine.innerHTML +=
-        `&ensp;<a href="${withNixpkgs}" id="${nixpkgsId}"><b>nixpkgs-unstable</b></a>`
+        `&ensp;<a href="${compareLink}...nixpkgs-unstable" id="${nixpkgsId}"><b>nixpkgs-unstable</b></a>`
       prInfoLine.innerHTML +=
-        `&ensp;<a href="${withNixos}" id="${nixosId}"><b>nixos-unstable</b></a>`
+        `&ensp;<a href="${compareLink}...nixos-unstable" id="${nixosId}"><b>nixos-unstable</b></a>`
 
       const branchIndicate = (success, idSelector) => {
         const indicator = document.querySelector(`#${idSelector}`)
@@ -59,23 +60,16 @@
         }
       }
 
-      fetch(`${withMaster}.patch`)
+      const fetchBranchStatus = (link, idSelector) => fetch(`${link}?per_page=1`)
         .then(async (response) => await response.text())
-        .then((text) => text.trim().length > 0)
-        .then((success) => { branchIndicate(success, masterId) })
+        .then((text) => JSON.parse(text))
+        .then((json) => json.status === 'ahead')
+        .then((success) => { branchIndicate(success, idSelector) })
         .catch((e) => { console.log(e) })
 
-      fetch(`${withNixpkgs}.patch`)
-        .then(async (response) => await response.text())
-        .then((text) => text.trim().length > 0)
-        .then((success) => { branchIndicate(success, nixpkgsId) })
-        .catch((e) => { console.log(e) })
-
-      fetch(`${withNixos}.patch`)
-        .then(async (response) => await response.text())
-        .then((text) => text.trim().length > 0)
-        .then((success) => { branchIndicate(success, nixosId) })
-        .catch((e) => { console.log(e) })
+      fetchBranchStatus(withMaster, masterId)
+      fetchBranchStatus(withNixpkgs, nixpkgsId)
+      fetchBranchStatus(withNixos, nixosId)
     }
   }
 
