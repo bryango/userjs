@@ -47,9 +47,11 @@
       { name: 'nixos-unstable', id: 'compare-nixos' }
     ]
 
-    for (const branch in branches) {
+    // NOTE: `for...in` is not the right one!
+    // must use `for...of` (see mdn).
+    for (const branch of branches) {
       prInfoLine.innerHTML +=
-      `&ensp;<a href="${compareLink}...master" id="${branch.id}"><b>${branch.name}</b></a>`
+        `&ensp;<a href="${compareLink}...${branch.name}" id="${branch.id}"><b>${branch.name}</b></a>`
     }
 
     const branchIndicate = (success, branchId) => {
