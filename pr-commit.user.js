@@ -64,7 +64,9 @@
     }
 
     const fetchBranchStatus = (branch) => fetch(
-      `${compareApi}...${branch.name}?per_page=1`
+      `${compareApi}...${branch.name}?per_page=1000000&page=100`
+      // this trick uses pagination to not return files or commits
+      // only need to know whether 'ahead' or 'behind'
     )
       .then(async (response) => await response.text())
       .then((text) => JSON.parse(text))
