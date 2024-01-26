@@ -1,15 +1,26 @@
 // ==UserScript==
-// @name        Info for merged PR
+// @name        Info for merged pull requests
 // @namespace   Violentmonkey Scripts
 // @include     /github\.com\/([\w-]+\/[\w-]+)\/pull\/(\d+)/
 // @grant       none
-// @version     1.3
-// @author      Bryan Go
+// @version     1.4
+// @author      Bryan Lai <bryanlais@gmail.com>
 // @description 10/29/2023, 11:47:39 AM
 // ==/UserScript==
 
 (function () {
   'use strict'
+
+  /**
+   * Configure nixpkgs branches to watch for the merge commit.
+   * This would only display under github.com/NixOS/nixpkgs/pull/.
+   */
+  const nixpkgsBranches = [
+    'staging-next',
+    'master',
+    'nixpkgs-unstable',
+    // 'nixos-unstable', // not that useful
+  ]
 
   const [, prRepo, prNumber] = document.URL.match(
     /^.*github\.com\/([\w-]+\/[\w-]+)\/pull\/(\d+).*$/
@@ -41,11 +52,13 @@
     const compareLink = `https://github.com/NixOS/nixpkgs/compare/${commitHash}`
     const compareApi = `https://api.github.com/repos/NixOS/nixpkgs/compare/${commitHash}`
 
-    const branches = [
-      { name: 'master', id: 'compare-master' },
-      { name: 'nixpkgs-unstable', id: 'compare-nixpkgs' },
-      { name: 'nixos-unstable', id: 'compare-nixos' }
-    ]
+    const branches = nixpkgsBranches.map(branchName => {
+      return {
+        name: branchName,
+        id: `compare-${branchName}`,
+        // ^ used internally to identify the element and decorate it
+      }
+    })
 
     // NOTE: `for...in` is not the right one!
     // must use `for...of` (see mdn).
