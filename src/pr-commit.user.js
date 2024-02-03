@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @include     /github\.com\/([\w-]+\/[\w-]+)\/pull\/(\d+)/
 // @grant       none
-// @version     1.4
+// @version     1.5
 // @author      Bryan Lai <bryanlais@gmail.com>
 // @description 10/29/2023, 11:47:39 AM
 // ==/UserScript==
@@ -12,30 +12,28 @@
   'use strict'
 
   /**
-   * Configure nixpkgs branches to watch for the merge commit.
-   * This would only display under github.com/NixOS/nixpkgs/pull/.
+   * Configure repo branches to watch for the merge commit.
    */
-  const nixpkgsBranches = [
-    'staging-next',
-    'master',
-    'nixpkgs-unstable',
-    // 'nixos-unstable', // not that useful
-  ]
+  const subscribedRepos = {
+
+    // e.g. this would only show up under github.com/NixOS/nixpkgs/pull/
+    'NixOS/nixpkgs': [
+      'staging-next',
+      'master',
+      'nixpkgs-unstable',
+    ],
+
+  }
 
   const [, prRepo, prNumber] = document.URL.match(
     /^.*github\.com\/([\w-]+\/[\w-]+)\/pull\/(\d+).*$/
   )
 
   const prApi = `https://api.github.com/repos/${prRepo}/pulls/${prNumber}`
-  const isNixpkgs = document.URL.includes(
-    'github.com/NixOS/nixpkgs/pull/'
-  )
 
   const processResponse = json => {
-    if (!json.merged) {
-      return
-    }
-
+    // surprise: even unmerged commit will have a `merge_commit_sha`
+    // this can be used to test the pr before it's merged
     const commitHash = json.merge_commit_sha
     const commitShort = commitHash.slice(0, 7)
     const commitLink = `https://github.com/${prRepo}/commit/${commitHash}`
@@ -45,14 +43,15 @@
     prInfoLine.innerHTML +=
       `&ensp;<a href="${commitLink}"><code class="Link--primary text-bold">${commitShort}</code></a>`
 
-    if (!isNixpkgs) {
+    if (!(json.merged && prRepo in subscribedRepos)) {
       return
     }
 
-    const compareLink = `https://github.com/NixOS/nixpkgs/compare/${commitHash}`
-    const compareApi = `https://api.github.com/repos/NixOS/nixpkgs/compare/${commitHash}`
+    const compareLink = `https://github.com/${prRepo}/compare/${commitHash}`
+    const compareApi = `https://api.github.com/repos/${prRepo}/compare/${commitHash}`
 
-    const branches = nixpkgsBranches.map(branchName => {
+    const subscribedBranches = subscribedRepos[prRepo]
+    const branches = subscribedBranches.map(branchName => {
       return {
         name: branchName,
         id: `compare-${branchName}`,
@@ -60,7 +59,7 @@
       }
     })
 
-    // NOTE: `for...in` is not the right one!
+    // javascript trap: `for...in` is not the right one!
     // must use `for...of` (see mdn).
     for (const branch of branches) {
       prInfoLine.innerHTML +=
