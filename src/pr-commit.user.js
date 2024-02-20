@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @include     /github\.com\/([\w-]+\/[\w-]+)\/pull\/(\d+)/
 // @grant       none
-// @version     1.6
+// @version     1.7
 // @author      Bryan Lai <bryanlais@gmail.com>
 // @description 10/29/2023, 11:47:39 AM
 // ==/UserScript==
