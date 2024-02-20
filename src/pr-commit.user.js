@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @include     /github\.com\/([\w-]+\/[\w-]+)\/pull\/(\d+)/
 // @grant       none
-// @version     1.5
+// @version     1.6
 // @author      Bryan Lai <bryanlais@gmail.com>
 // @description 10/29/2023, 11:47:39 AM
 // ==/UserScript==
@@ -25,10 +25,30 @@
 
   }
 
-  const [, prRepo, prNumber] = document.URL.match(
+  /**
+   * Parse the URL of repo and pull request ID.
+   * @type {string[]}
+   */
+  const [, prRepoURL, prNumber] = document.URL.match(
     /^.*github\.com\/([\w-]+\/[\w-]+)\/pull\/(\d+).*$/
   )
 
+  /**
+   * Normalize the repo name if it has been subscribed.
+   * @param {string} prRepoURL
+   * @returns {string}
+   */
+  const normalizeRepoName = prRepoURL => {
+    const localesUndefined = undefined
+    for (const prRepo in subscribedRepos) {
+      if (prRepo.localeCompare(prRepoURL, localesUndefined, { sensitivity: 'accent' }) === 0) {
+        return prRepo
+      }
+    }
+    return prRepoURL
+  }
+
+  const prRepo = normalizeRepoName(prRepoURL)
   const prApi = `https://api.github.com/repos/${prRepo}/pulls/${prNumber}`
 
   const processResponse = json => {
