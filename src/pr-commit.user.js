@@ -58,7 +58,7 @@
     const commitShort = commitHash.slice(0, 7)
     const commitLink = `https://github.com/${prRepo}/commit/${commitHash}`
 
-    const prInfoSelector = '.rgh-conversation-activity-filter-wrapper'
+    const prInfoSelector = '.gh-header-meta div:last-child'
     const prInfoLine = document.querySelector(prInfoSelector)
     prInfoLine.innerHTML +=
       `&ensp;<a href="${commitLink}"><code class="Link--primary text-bold">${commitShort}</code></a>`
