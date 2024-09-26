@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @include     /github\.com\/([\w-]+\/[\w-]+)\/pull\/(\d+)/
 // @grant       none
-// @version     1.7
+// @version     1.8
 // @author      Bryan Lai <bryanlais@gmail.com>
 // @description 10/29/2023, 11:47:39 AM
 // ==/UserScript==
@@ -67,7 +67,7 @@
       return
     }
 
-    const compareLink = `https://github.com/${prRepo}/compare/${commitHash}`
+    const compareLink = `https://github.com/${prRepo}/compare`
     const compareApi = `https://api.github.com/repos/${prRepo}/compare/${commitHash}`
 
     const subscribedBranches = subscribedRepos[prRepo]
@@ -83,14 +83,17 @@
     // must use `for...of` (see mdn).
     for (const branch of branches) {
       prInfoLine.innerHTML +=
-        `&ensp;<a href="${compareLink}...${branch.name}" id="${branch.id}"><b>${branch.name}</b></a>`
+        `&ensp;<a href="${compareLink}/${commitHash}...${branch.name}" id="${branch.id}"><b>${branch.name}</b></a>`
     }
 
-    const branchIndicate = (success, branchId) => {
-      const branchInfo = document.querySelector(`#${branchId}`)
+    const branchIndicate = (success, branch) => {
+      const branchInfo = document.querySelector(`#${branch.id}`)
       let indicator = '⚠️ '
       if (success) {
         indicator = '✅ '
+      } else {
+        // swap the comparison to show how far behind the branch is
+        branchInfo.href = `${compareLink}/${branch.name}...${commitHash}`
       }
       branchInfo.outerHTML = indicator + branchInfo.outerHTML
     }
@@ -103,7 +106,7 @@
       .then(async (response) => await response.text())
       .then((text) => JSON.parse(text))
       .then((json) => json.status === 'ahead')
-      .then((success) => { branchIndicate(success, branch.id) })
+      .then((success) => { branchIndicate(success, branch) })
       .catch((e) => { console.log(e) })
 
     branches.forEach(fetchBranchStatus)
