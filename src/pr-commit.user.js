@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Info for merged pull requests
 // @namespace   Violentmonkey Scripts
-// @include     /github\.com\/([\w-]+\/[\w-]+)\/pull\/(\d+)/
+// @include     /github\.com\/([\w-]+\/[\w-]+)\/pull\/(\d+).*$/
 // @grant       none
 // @version     1.8
 // @author      Bryan Lai <bryanlais@gmail.com>
