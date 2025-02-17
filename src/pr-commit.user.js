@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @include     /github\.com\/([\w-]+\/[\w-]+)\/pull\/(\d+).*$/
 // @grant       none
-// @version     1.8
+// @version     1.9
 // @author      Bryan Lai <bryanlais@gmail.com>
 // @description 10/29/2023, 11:47:39 AM
 // ==/UserScript==
@@ -105,7 +105,7 @@
     )
       .then(async (response) => await response.text())
       .then((text) => JSON.parse(text))
-      .then((json) => json.status === 'ahead')
+      .then((json) => json.status === 'ahead' || json.status === 'identical')
       .then((success) => { branchIndicate(success, branch) })
       .catch((e) => { console.log(e) })
 
