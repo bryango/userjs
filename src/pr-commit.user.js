@@ -76,6 +76,7 @@
         name: branchName,
         id: `compare-${branchName.replace(/[.\s]/g, '-')}`,
         // ^ used internally to identify the element and decorate it
+        // ... sanitize the string if it contains "."
       }
     })
 
