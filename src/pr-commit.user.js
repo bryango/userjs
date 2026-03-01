@@ -58,10 +58,10 @@
     const commitShort = commitHash.slice(0, 7)
     const commitLink = `https://github.com/${prRepo}/commit/${commitHash}`
 
-    const prInfoSelector = '.gh-header-meta div:last-child'
+    const prInfoSelector = '[class^="prc-PageHeader-Description"] div:last-child > div:last-child > span:first-child'
     const prInfoLine = document.querySelector(prInfoSelector)
     prInfoLine.innerHTML +=
-      `&ensp;<a href="${commitLink}"><code class="Link--primary text-bold">${commitShort}</code></a>`
+      `&nbsp;<a href="${commitLink}"><code class="Link--primary text-bold">${commitShort}</code></a>`
 
     if (!(json.merged && prRepo in subscribedRepos)) {
       return
