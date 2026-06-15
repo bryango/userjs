@@ -58,7 +58,7 @@
     const commitShort = commitHash.slice(0, 7)
     const commitLink = `https://github.com/${prRepo}/commit/${commitHash}`
 
-    const prInfoSelector = '[class^="prc-PageHeader-Description"] div:last-child > div:last-child > span:first-child'
+    const prInfoSelector = '[class*="PullRequestHeaderSummary"]'
     const prInfoLine = document.querySelector(prInfoSelector)
     prInfoLine.innerHTML +=
       `&nbsp;<a href="${commitLink}"><code class="Link--primary text-bold">${commitShort}</code></a>`
@@ -100,7 +100,8 @@
     }
 
     const fetchBranchStatus = (branch) => fetch(
-      `${compareApi}...${branch.name}?per_page=1000000&page=100`
+      `${compareApi}...${branch.name}?per_page=1000000&page=100`,
+      { credentials: "include" }
       // this trick uses pagination to not return files or commits
       // only need to know whether 'ahead' or 'behind'
     )
@@ -113,7 +114,7 @@
     branches.forEach(fetchBranchStatus)
   }
 
-  fetch(prApi)
+  fetch(prApi, { credentials: "include" })
     .then(async (response) => await response.text())
     .then((text) => JSON.parse(text))
     .then((json) => { processResponse(json) })
