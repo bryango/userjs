@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @include     /github\.com\/([\w-]+\/[\w-]+)\/pull\/(\d+).*$/
 // @grant       none
-// @version     1.9
+// @version     1.10
 // @author      Bryan Lai <bryanlais@gmail.com>
 // @description 10/29/2023, 11:47:39 AM
 // ==/UserScript==
@@ -58,10 +58,15 @@
     const commitShort = commitHash.slice(0, 7)
     const commitLink = `https://github.com/${prRepo}/commit/${commitHash}`
 
-    const prInfoSelector = '[class*="PullRequestHeaderSummary"]'
-    const prInfoLine = document.querySelector(prInfoSelector)
+    const prInfoSelector = '[data-component="PageHeader.Description"], [class*="PullRequestHeaderSummary"]'
+    const prInfoHeader = document.querySelector(prInfoSelector)
+    if (!prInfoHeader) return
+    const prInfoLine = document.createElement('div')
+    prInfoLine.id = 'userjs-pr-commit-info'
+    prInfoLine.style.cssText = 'display:flex;flex-wrap:wrap;gap:0.75em;margin-top:0.5em;font-size:14px'
+    prInfoHeader.append(prInfoLine)
     prInfoLine.innerHTML +=
-      `&nbsp;<a href="${commitLink}"><code class="Link--primary text-bold">${commitShort}</code></a>`
+      `<a href="${commitLink}"><code class="Link--primary text-bold">${commitShort}</code></a>`
 
     if (!(json.merged && prRepo in subscribedRepos)) {
       return
@@ -84,7 +89,7 @@
     // must use `for...of` (see mdn).
     for (const branch of branches) {
       prInfoLine.innerHTML +=
-        `&ensp;<a href="${compareLink}/${commitHash}...${branch.name}" id="${branch.id}"><b>${branch.name}</b></a>`
+        `<a href="${compareLink}/${commitHash}...${branch.name}" id="${branch.id}">${branch.name}</a>`
     }
 
     const branchIndicate = (success, branch) => {
@@ -96,7 +101,8 @@
         // swap the comparison to show how far behind the branch is
         branchInfo.href = `${compareLink}/${branch.name}...${commitHash}`
       }
-      branchInfo.outerHTML = indicator + branchInfo.outerHTML
+      branchInfo.prepend(indicator)
+      branchInfo.title = success ? 'Contains the merge commit' : 'Does not contain the merge commit'
     }
 
     const fetchBranchStatus = (branch) => fetch(
